@@ -4,7 +4,7 @@ from glob import glob
 import streamlit as st
 
 api_key = st.secrets["api-key"]
-data_folder = "../../data/"
+data_folder = "data/"
 sites = pd.read_csv(data_folder + "Securities Settlement Websites.csv")
 
 
@@ -36,7 +36,7 @@ def get(url):
 
 def load_titles():
     titles = {}
-    for file in glob("../../data/legal_docs/*/index.csv"):
+    for file in glob("data/legal_docs/*/index.csv"):
         case = file.split("\\")[-2]
         with open(file) as f:
             df = pd.read_csv(f, encoding=f.encoding, index_col="filename")

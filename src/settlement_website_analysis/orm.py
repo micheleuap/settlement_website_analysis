@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Table, Column, String, Float, Integer, MetaData
 
-engine = create_engine("sqlite:///../../data/data.db")
+engine = create_engine("sqlite:///data/data.db")
 
 metadata_obj = MetaData()
 
