@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 from glob import glob
+import streamlit as st
 
 api_key = st.secrets["api-key"]
 data_folder = "../../data/"
