@@ -1,0 +1,3 @@
+data/legal_docs/*
+*.csv
+src/settlement website analysis/__pycache__
