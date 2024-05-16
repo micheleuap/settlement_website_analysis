@@ -1,0 +1,9 @@
+streamlit
+pandas
+requests
+altair
+langchain
+joblib
+pymupdf
+sqlalchemy
+beautifulsoup4
