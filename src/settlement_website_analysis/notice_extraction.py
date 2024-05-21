@@ -1,6 +1,6 @@
 import pandas as pd
 import fitz
-from orm import documents_table, engine, notice_table
+from src.settlement_website_analysis.orm import documents_table, engine, notice_table
 from sqlalchemy import select, insert
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import TokenTextSplitter
 from typing import Optional
 from langchain_community.vectorstores import FAISS
-from assets import api_key
+from src.settlement_website_analysis.assets import api_key, data_folder
 
 
 class LegalTeam(BaseModel):
@@ -81,10 +81,13 @@ with engine.connect() as conn:
         select(documents_table).where(
             documents_table.c.title.contains("NOTICE OF"),
             documents_table.c.title.contains("PROPOSED SETTLEMENT"),
+            documents_table.c.case.not_in(select(notice_table.c.case)),
         )
     )
     docs = pd.DataFrame(docs.fetchall(), columns=docs.keys())
-    docs["path"] = "../../data/legal_docs/" + docs.case + "/" + docs.filename + ".pdf"
+    docs["path"] = (
+        data_folder + "legal_docs/" + docs.case + "/" + docs.filename + ".pdf"
+    )
 
 
 for i, doc in docs.iterrows():
@@ -112,8 +115,5 @@ with engine.connect() as conn:
     pd.read_sql_table("notice_info", conn)
 
 with engine.connect() as conn:
-    pd.read_sql_table("cases", conn).to_csv("../../cases.csv", index=False)
-    pd.read_sql_table("documents", conn).to_csv("../../documents.csv", index=False)
-
-notice_table.drop(engine)
-print(join_output(retriever.invoke(rag_prompt)))
+    pd.read_sql_table("cases", conn).to_csv("cases.csv", index=False)
+    pd.read_sql_table("documents", conn).to_csv("documents.csv", index=False)

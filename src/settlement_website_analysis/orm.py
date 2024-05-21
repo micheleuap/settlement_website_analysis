@@ -10,6 +10,7 @@ documents_table = Table(
     Column("title", String),
     Column("filename", String),
     Column("case", String),
+    Column("link", String),
 )
 
 case_table = Table(
@@ -43,6 +44,14 @@ expenses_table = Table(
     Column("sub_amount", Float),
 )
 
+summaries_table = Table(
+    "summaries",
+    metadata_obj,
+    Column("filename", String),
+    Column("case", String),
+    Column("sub_document", String),
+    Column("summary", String),
+)
 
 if __name__ == "__main__":
     metadata_obj.create_all(engine)

@@ -1,13 +1,15 @@
-import pandas as pd
-from assets import sites, data_folder, get, api_key
 from glob import glob
+
+import pandas as pd
 from bs4 import BeautifulSoup
-from typing import Optional
-from sqlalchemy import insert, select, delete
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
-from orm import case_table, engine
+from sqlalchemy import insert, select
+
+from src.settlement_website_analysis.assets import api_key, data_folder, sites
+from src.settlement_website_analysis.orm import case_table, engine
+
 
 root_dir = data_folder + "legal_docs/"
 folders = glob("*", root_dir=root_dir)
@@ -23,10 +25,6 @@ class SettlementHomePage(BaseModel):
         default=None,
         description=("The dollar amount of the settlement pool"),
     )
-    # settlement_shares: Optional[int] = Field(
-    #     default=None,
-    #     description=("The number of shares included as part of the settlement, if any"),
-    # )
     class_period: str = Field(
         default=None,
         description=(
@@ -62,6 +60,8 @@ runnable = prompt | llm.with_structured_output(schema=SettlementHomePage)
 
 for company in folders:
     with engine.connect() as conn:
+        if conn.execute(select(case_table).where(case_table.c.case == company)).all():
+            continue
         site = sites[sites.Company == company].squeeze().Website
         with open(f"{root_dir}{company}/home_page.html", encoding="utf-8") as f:
             soup = BeautifulSoup(f, features="html.parser")
@@ -78,12 +78,7 @@ for company in folders:
                 allegations=output.allegations,
             )
         )
-
         conn.commit()
 
 
 t = pd.read_sql_table("cases", engine)
-
-# with engine.connect() as conn:
-#     conn.execute(delete(case_table))
-#     conn.commit()

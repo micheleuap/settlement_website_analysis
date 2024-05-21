@@ -5,12 +5,11 @@ from sqlalchemy import insert
 
 
 def load_titles():
-    titles = {}
-    for file in glob("data/legal_docs/*/index.csv"):
-        case = file.split("\\")[-2]
-        with open(file) as f:
-            df = pd.read_csv(f, encoding=f.encoding, index_col="filename")
-        titles[case] = df
+    titles = {
+        file.split("\\")[-2]: pd.read_csv(file, index_col="filename")
+        for file in glob("data/legal_docs/*/index.csv")
+    }
+
     df = pd.concat(titles, names=["case"]).reset_index()
     df = df.rename(columns=lambda x: x.strip())
     df = df.rename(columns={"full_name": "title"})
@@ -18,5 +17,5 @@ def load_titles():
 
 
 with engine.connect() as conn:
-    conn.execute(insert(documents_table).values(load_titles().to_dict("records")))
+    _ = conn.execute(insert(documents_table).values(load_titles().to_dict("records")))
     conn.commit()
