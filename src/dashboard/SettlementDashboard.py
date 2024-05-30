@@ -3,8 +3,6 @@ import altair as alt
 import pandas as pd
 from sqlalchemy import create_engine
 
-st.set_page_config(layout="wide")
-
 
 def row2para(row):
     title = row.title if row.sub_document == "main" else row.sub_document
@@ -142,18 +140,17 @@ colnames = {
     "attorney_fees": "Attorney Fees (% of Settlement)",
 }
 
-_, m, _ = st.columns([25, 50, 25])
-with m:
-    t1, t2 = st.tabs(["Settlement Analysis", "General Overview"])
-    with t2:
-        high_level_summary()
-    with t1:
-        case_selected = st.selectbox(
-            label="Select a settlement:", options=db["cases"].case, index=None
-        )
-        if case_selected:
-            c1, c2 = st.tabs(["Settlement Overview", "Summary of Court Documents"])
-            with c1:
-                settlement_overview()
-            with c2:
-                list_of_case_documents()
+
+t1, t2 = st.tabs(["Settlement Analysis", "General Overview"])
+with t2:
+    high_level_summary()
+with t1:
+    case_selected = st.selectbox(
+        label="Select a settlement:", options=db["cases"].case, index=None
+    )
+    if case_selected:
+        c1, c2 = st.tabs(["Settlement Overview", "Summary of Court Documents"])
+        with c1:
+            settlement_overview()
+        with c2:
+            list_of_case_documents()
