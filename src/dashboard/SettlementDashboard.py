@@ -13,7 +13,7 @@ def row2para(row):
         f"🔗[**Link to the original document**]({row.link}) \n\n"
         if row.sub_document == "main"
         else f"**{title}**\n\n"
-    ) + f"{row.summary.replace("$", r"\$")}"
+    ) + f"{row.summary.replace('$', r'\$')}"
     return t
 
 
