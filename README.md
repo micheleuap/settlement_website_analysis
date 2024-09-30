@@ -15,7 +15,7 @@ The streamlit dashboard is also hosted [here](https://settlementdashboard.stream
 - **Streamlit Dashboard**: Displays all extracted information in an interactive dashboard for easy exploration and analysis.
 
 
-### Stack
+### Requirements
 
 - Python 3.x
 - Langchain+OpenAI: To build the rag pipeline
