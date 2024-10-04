@@ -1,3 +1,4 @@
 data/legal_docs/*
 *.csv
 src/settlement_website_analysis/__pycache__
+*.pyc
