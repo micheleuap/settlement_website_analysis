@@ -31,7 +31,6 @@ The streamlit dashboard is also hosted [here](https://settlementdashboard.stream
  ┣ 📂data                          # Data storage (database and extracted and processed files)
  ┣ 📂src                           # Scripts for web scraping and document parsing
   ┣ 📂dashboard                    # Streamlit scripts
-   ┗ 📜SettlementDashboard.py        
   ┗ 📂settlement-website-analyis   # scraping, parsing, RAG extraction
  ┣ 📜requirements.txt              # Python dependencies
  ┗ 📜README.md                     # Project documentation
