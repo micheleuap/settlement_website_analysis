@@ -3,7 +3,7 @@
 This project is a Streamlit dashboard designed to extract, process, and display key information from the settlement websites of US securities litigations. The tool automates the extraction of data from these websites, including parsing legal documents, and presents the findings in a user-friendly format.
 
 ### Link 
-The streamlit dashboard is also hosted [here](https://settlementdashboard.streamlit.app/) on the streamlit community cloud. 
+The streamlit dashboard is also hosted [here](https://ussettlementdashboard.streamlit.app/) on the streamlit community cloud. 
 
 ### Features
 
