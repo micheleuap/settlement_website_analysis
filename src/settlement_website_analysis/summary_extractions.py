@@ -1,5 +1,6 @@
 import re
 from pprint import pprint
+from typing import Dict, List
 
 import fitz
 import nltk
@@ -15,10 +16,11 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from nltk.corpus import words
 from sqlalchemy import insert, select
 
-from src.settlement_website_analysis.orm import engine, summaries_table
 from src.settlement_website_analysis.assets import api_key, data_folder
+from src.settlement_website_analysis.orm import engine, summaries_table
 
 
+# A class representing the document summary structure
 class DocumentSummary(BaseModel):
     content: str = Field(
         default=None,
@@ -30,13 +32,24 @@ class DocumentSummary(BaseModel):
     )
 
 
+# A class to recognize English language text using NLTK
 class EnglishRecognizer:
-    def __init__(self):
+    def __init__(self) -> None:
         nltk.download("words", quiet=True)
         nltk.download("punkt", quiet=True)
         self.word_list = set(words.words())
 
-    def is_english(self, text, threshold=0.5):
+    def is_english(self, text: str, threshold: float = 0.5) -> bool:
+        """
+        Check if the given text is predominantly in English.
+
+        Parameters:
+        - text (str): The input text to evaluate.
+        - threshold (float): The minimum fraction of words that must be English.
+
+        Returns:
+        - bool: True if the text is mostly in English, False otherwise.
+        """
         tokens = nltk.word_tokenize(text)
         if len(tokens) == 0:
             return False
@@ -44,8 +57,17 @@ class EnglishRecognizer:
         return len(english_words) / len(tokens) > threshold
 
 
-def further_split(sent, maxlen):
-    """The chunker of last resort - attempts to chunk where no sentences could be identified"""
+def further_split(sent: str, maxlen: int) -> List[str]:
+    """
+    Chunk long strings where no sentence boundaries are identified.
+
+    Parameters:
+    - sent (str): The input sentence to split.
+    - maxlen (int): Maximum allowed chunk length.
+
+    Returns:
+    - List[str]: A list of sentence chunks.
+    """
     if len(sent) < maxlen:
         return [sent]
 
@@ -56,7 +78,18 @@ def further_split(sent, maxlen):
     return [sent[i : i + maxlen] for i in range(0, len(sent), maxlen)]
 
 
-def make_chunks(t, nlp, maxlen=1000):
+def make_chunks(t: str, nlp: spacy.Language, maxlen: int = 1000) -> List[str]:
+    """
+    Splits a large text into manageable chunks based on sentence boundaries.
+
+    Parameters:
+    - t (str): The input text.
+    - nlp: A SpaCy language model instance.
+    - maxlen (int): The maximum length of each chunk.
+
+    Returns:
+    - List[str]: List of chunks.
+    """
     chunks = [""]
     for sent in nlp(t).sents:
         for subsent in further_split(sent.text, maxlen):
@@ -68,7 +101,16 @@ def make_chunks(t, nlp, maxlen=1000):
     return chunks
 
 
-def split_docs(f):
+def split_docs(file: fitz.Document) -> List[str]:
+    """
+    Splits a PDF document into smaller sub-documents based on some heuristic.
+
+    Parameters:
+    - file: A PyMuPDF file object.
+
+    Returns:
+    - List[str]: List of sub-document text chunks.
+    """
     sections = [""]
     titles = ["main"]
     for page in f:
@@ -87,7 +129,16 @@ def split_docs(f):
     return dict(zip(titles, sections))
 
 
-def extract_summaries(subdocuments):
+def extract_summaries(subdocuments: List[str]) -> Dict[str, str]:
+    """
+    Generate summaries for a list of subdocuments using an LLM model.
+
+    Parameters:
+    - subdocs (List[str]): List of text chunks (sub-documents).
+
+    Returns:
+    - Dict[str, str]: A dictionary mapping sub-document titles to their summaries.
+    """
     prompt1 = ChatPromptTemplate.from_messages(
         [
             (

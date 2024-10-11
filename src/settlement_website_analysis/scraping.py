@@ -5,13 +5,9 @@ from urllib.parse import urljoin
 from shutil import rmtree
 from random import shuffle
 from src.settlement_website_analysis.assets import sites, RequestError, get, Website
-from glob import glob
-import pandas as pd
 
 
 def epiq(site):
-    ## the try except should go in the save all, so that it continues even if it fails one.
-    ##  the
     current_page = urljoin(site.url, "Home/Documents")
     response = get(current_page)
     soup = BeautifulSoup(response.text)

@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import fitz
 import pandas as pd
@@ -40,7 +40,46 @@ class InvalidTableFormat(Exception):
     pass
 
 
-def extract_tables(case, filename):
+def extract_tables(case: str, filename: str) -> List[Tuple[int, str, pd.DataFrame]]:
+    """
+    Extracts relevant tables from a PDF document based on specific column criteria and processes them.
+
+    Parameters:
+    -----------
+    case : str
+        The name or identifier of the legal case. Used to build the path to the PDF file.
+    filename : str
+        The name of the PDF file (without the extension) from which tables are extracted.
+
+    Returns:
+    --------
+    List[Tuple[int, str, pd.DataFrame]] or None
+        A list of tuples, where each tuple contains:
+        - `page_num` (int): The page number where the table was found.
+        - `page_text` (str): The text content of the page where the table was found.
+        - `table` (pd.DataFrame): The extracted and processed table in the form of a Pandas DataFrame.
+
+        If the PDF file is not found or cannot be opened, the function returns `None`.
+
+    Raises:
+    -------
+    fitz.FileDataError
+        If there is an issue with reading the PDF file data.
+    fitz.FileNotFoundError
+        If the file specified by `path` does not exist.
+
+    Notes:
+    ------
+    - The function looks for tables that contain the column "AMOUNT" and exclude the columns "NARRATIVE" and "HOURS".
+    - It uses manual processing (`manual_table`) for valid table formats or a language model (`llm_table`) for fallback in case of invalid formats.
+    - Multiple tables on the same page are concatenated into one DataFrame before appending them to the result list.
+
+    Example:
+    --------
+    >>> extract_tables("case_123", "document")
+    [(1, "Page 1 text content", DataFrame), (2, "Page 2 text content", DataFrame)]
+    """
+
     path = f"{data_folder}legal_docs/{case}/{filename}.pdf"
     try:
         file = fitz.open(path)
@@ -101,6 +140,22 @@ def manual_table(df):
 
 
 def llm_table(page, table):
+    """
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        A DataFrame containing financial or categorical data that needs to be processed.
+        The DataFrame is expected to have either two or three columns:
+        - ["CATEGORY", "AMOUNT"]
+        - ["EXPENSE", "AMOUNT"]
+        - ["CATEGORY", "Col1", "AMOUNT"]
+
+    Returns:
+    --------
+    pd.DataFrame
+        The processed DataFrame with updated column names and cleaned numeric values in
+        the 'AMOUNT' and 'SUB_AMOUNT' columns.
+    """
     model = ChatOpenAI(model="gpt-4o", api_key=api_key)
     prompt = ChatPromptTemplate.from_messages(
         [
