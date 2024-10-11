@@ -3,7 +3,12 @@ pandas
 requests
 altair
 langchain
+langchain_community
+langchain_openai
 joblib
 pymupdf
 sqlalchemy
 beautifulsoup4
+streamlit
+spacy
+nltk
